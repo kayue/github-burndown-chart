@@ -1,6 +1,0 @@
-node_modules/
-.idea/
-*.log
-src/components/
-build/
-config.json
