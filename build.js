@@ -205,7 +205,7 @@ module.exports = require('./dist/lodash.compat.js');
 require.register("lodash-lodash/dist/lodash.compat.js", function(exports, require, module){
 /**
  * @license
- * Lo-Dash 2.2.1 (Custom Build) <http://lodash.com/>
+ * Lo-Dash 2.2.0 (Custom Build) <http://lodash.com/>
  * Build: `lodash -o ./dist/lodash.compat.js`
  * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
@@ -792,8 +792,8 @@ require.register("lodash-lodash/dist/lodash.compat.js", function(exports, requir
     /*--------------------------------------------------------------------------*/
 
     /**
-     * Creates a `lodash` object which wraps the given value to enable intuitive
-     * method chaining.
+     * Creates a `lodash` object which wraps the given value to enable method
+     * chaining.
      *
      * In addition to Lo-Dash methods, wrappers also have the following `Array` methods:
      * `concat`, `join`, `pop`, `push`, `reverse`, `shift`, `slice`, `sort`, `splice`,
@@ -826,8 +826,6 @@ require.register("lodash-lodash/dist/lodash.compat.js", function(exports, requir
      *
      * The wrapper functions `first` and `last` return wrapped values when `n` is
      * provided, otherwise they return unwrapped values.
-     *
-     * Explicit chaining can be enabled by using the `_.chain` method.
      *
      * @name _
      * @constructor
@@ -6106,12 +6104,9 @@ require.register("lodash-lodash/dist/lodash.compat.js", function(exports, requir
 
             push.apply(args, arguments);
             var result = func.apply(object, args);
-            if (value && typeof value == 'object' && value === result) {
-              return this;
-            }
-            result = new ctor(result);
-            result.__chain__ = this.__chain__;
-            return result;
+            return (value && typeof value == 'object' && value === result)
+              ? this
+              : new ctor(result);
           };
         }
       });
@@ -6341,7 +6336,7 @@ require.register("lodash-lodash/dist/lodash.compat.js", function(exports, requir
       // and Laura Doktorova's doT.js
       // https://github.com/olado/doT
       var settings = lodash.templateSettings;
-      text = String(text || '');
+      text || (text = '');
 
       // avoid missing dependencies when `iteratorTemplate` is not defined
       options = defaults({}, options, settings);
@@ -6513,8 +6508,7 @@ require.register("lodash-lodash/dist/lodash.compat.js", function(exports, requir
     /*--------------------------------------------------------------------------*/
 
     /**
-     * Creates a `lodash` object that wraps the given value with explicit
-     * method chaining enabled.
+     * Creates a `lodash` object that wraps the given value.
      *
      * @static
      * @memberOf _
@@ -6530,10 +6524,9 @@ require.register("lodash-lodash/dist/lodash.compat.js", function(exports, requir
      * ];
      *
      * var youngest = _.chain(stooges)
-     *     .sortBy('age')
+     *     .sortBy(function(stooge) { return stooge.age; })
      *     .map(function(stooge) { return stooge.name + ' is ' + stooge.age; })
-     *     .first()
-     *     .value();
+     *     .first();
      * // => 'moe is 40'
      */
     function chain(value) {
@@ -6570,7 +6563,7 @@ require.register("lodash-lodash/dist/lodash.compat.js", function(exports, requir
     }
 
     /**
-     * Enables explicit method chaining on the wrapper object.
+     * Enables method chaining on the wrapper object.
      *
      * @name chain
      * @memberOf _
@@ -6578,21 +6571,11 @@ require.register("lodash-lodash/dist/lodash.compat.js", function(exports, requir
      * @returns {*} Returns the wrapper object.
      * @example
      *
-     * var stooges = [
-     *   { 'name': 'moe', 'age': 40 },
-     *   { 'name': 'larry', 'age': 50 }
-     * ];
-     *
-     * // without explicit chaining
-     * _(stooges).first();
-     * // => { 'name': 'moe', 'age': 40 }
-     *
-     * // with explicit chaining
-     * _(stooges).chain()
-     *   .first()
-     *   .pick('age')
-     *   .value()
-     * // => { 'age': 40 }
+     * var sum = _([1, 2, 3])
+     *     .chain()
+     *     .reduce(function(sum, num) { return sum + num; })
+     *     .value()
+     * // => 6`
      */
     function wrapperChain() {
       this.__chain__ = true;
@@ -6826,7 +6809,7 @@ require.register("lodash-lodash/dist/lodash.compat.js", function(exports, requir
      * @memberOf _
      * @type string
      */
-    lodash.VERSION = '2.2.1';
+    lodash.VERSION = '2.2.0';
 
     // add "Chaining" functions to the wrapper
     lodash.prototype.chain = wrapperChain;
@@ -28052,9 +28035,9 @@ var block = {
   blockquote: /^( *>[^\n]+(\n[^\n]+)*\n*)+/,
   list: /^( *)(bull) [\s\S]+?(?:hr|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
   html: /^ *(?:comment|closed|closing) *(?:\n{2,}|\s*$)/,
-  def: /^ *\[([^\]]+)\]: *([^\s]+)(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
+  def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
   table: noop,
-  paragraph: /^([^\n]+\n?(?!hr|heading|lheading|blockquote|tag|def))+\n*/,
+  paragraph: /^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote|tag|def))+)\n*/,
   text: /^[^\n]+/
 };
 
@@ -28101,7 +28084,7 @@ block.normal = merge({}, block);
  */
 
 block.gfm = merge({}, block.normal, {
-  fences: /^ *(`{3,}|~{3,}) *(\w+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
+  fences: /^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,
   paragraph: /^/
 });
 
@@ -28175,6 +28158,8 @@ Lexer.prototype.token = function(src, top) {
     , next
     , loose
     , cap
+    , bull
+    , b
     , item
     , space
     , i
@@ -28303,10 +28288,11 @@ Lexer.prototype.token = function(src, top) {
     // list
     if (cap = this.rules.list.exec(src)) {
       src = src.substring(cap[0].length);
+      bull = cap[2];
 
       this.tokens.push({
         type: 'list_start',
-        ordered: isFinite(cap[2])
+        ordered: bull.length > 1
       });
 
       // Get each top-level item.
@@ -28331,6 +28317,16 @@ Lexer.prototype.token = function(src, top) {
           item = !this.options.pedantic
             ? item.replace(new RegExp('^ {1,' + space + '}', 'gm'), '')
             : item.replace(/^ {1,4}/gm, '');
+        }
+
+        // Determine whether the next list item belongs here.
+        // Backpedal if it does not belong in this list.
+        if (this.options.smartLists && i !== l - 1) {
+          b = block.bullet.exec(cap[i+1])[0];
+          if (bull !== b && !(bull.length > 1 && b.length > 1)) {
+            src = cap.slice(i + 1).join('\n') + src;
+            i = l - 1;
+          }
         }
 
         // Determine whether item is loose or not.
@@ -28370,7 +28366,7 @@ Lexer.prototype.token = function(src, top) {
         type: this.options.sanitize
           ? 'paragraph'
           : 'html',
-        pre: cap[1] === 'pre',
+        pre: cap[1] === 'pre' || cap[1] === 'script',
         text: cap[0]
       });
       continue;
@@ -28425,7 +28421,9 @@ Lexer.prototype.token = function(src, top) {
       src = src.substring(cap[0].length);
       this.tokens.push({
         type: 'paragraph',
-        text: cap[0]
+        text: cap[1][cap[1].length-1] === '\n'
+          ? cap[1].slice(0, -1)
+          : cap[1]
       });
       continue;
     }
@@ -28455,7 +28453,7 @@ Lexer.prototype.token = function(src, top) {
  */
 
 var inline = {
-  escape: /^\\([\\`*{}\[\]()#+\-.!_>|])/,
+  escape: /^\\([\\`*{}\[\]()#+\-.!_>])/,
   autolink: /^<([^ >]+(@|:\/)[^ >]+)>/,
   url: noop,
   tag: /^<!--[\s\S]*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>/,
@@ -28464,7 +28462,7 @@ var inline = {
   nolink: /^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,
   strong: /^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,
   em: /^\b_((?:__|[\s\S])+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,
-  code: /^(`+)([\s\S]*?[^`])\1(?!`)/,
+  code: /^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,
   br: /^ {2,}\n(?!\s*$)/,
   del: noop,
   text: /^[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)/
@@ -28502,9 +28500,9 @@ inline.pedantic = merge({}, inline.normal, {
  */
 
 inline.gfm = merge({}, inline.normal, {
-  escape: replace(inline.escape)('])', '~])')(),
-  url: /^(https?:\/\/[^\s]+[^.,:;"')\]\s])/,
-  del: /^~{2,}([\s\S]+?)~{2,}/,
+  escape: replace(inline.escape)('])', '~|])')(),
+  url: /^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,
+  del: /^~~(?=\S)([\s\S]*?\S)~~/,
   text: replace(inline.text)
     (']|', '~]|')
     ('|', '|https?://|')
@@ -28555,8 +28553,8 @@ InlineLexer.rules = inline;
  * Static Lexing/Compiling Method
  */
 
-InlineLexer.output = function(src, links, opt) {
-  var inline = new InlineLexer(links, opt);
+InlineLexer.output = function(src, links, options) {
+  var inline = new InlineLexer(links, options);
   return inline.output(src);
 };
 
@@ -28692,7 +28690,7 @@ InlineLexer.prototype.output = function(src) {
     // text
     if (cap = this.rules.text.exec(src)) {
       src = src.substring(cap[0].length);
-      out += escape(cap[0]);
+      out += escape(this.smartypants(cap[0]));
       continue;
     }
 
@@ -28735,6 +28733,21 @@ InlineLexer.prototype.outputLink = function(cap, link) {
       : '')
       + '>';
   }
+};
+
+/**
+ * Smartypants Transformations
+ */
+
+InlineLexer.prototype.smartypants = function(text) {
+  if (!this.options.smartypants) return text;
+  return text
+    .replace(/(^|[-\u2014\s(\["])'/g, "$1\u2018")       // opening singles
+    .replace(/'/g, "\u2019")                            // closing singles & apostrophes
+    .replace(/(^|[-\u2014/\[(\u2018\s])"/g, "$1\u201C") // opening doubles
+    .replace(/"/g, "\u201D")                            // closing doubles
+    .replace(/--/g, "\u2014")                           // em-dashes
+    .replace(/\.{3}/g, '\u2026');                       // ellipsis
 };
 
 /**
@@ -28859,7 +28872,8 @@ Parser.prototype.tok = function() {
 
       return '<pre><code'
         + (this.token.lang
-        ? ' class="lang-'
+        ? ' class="'
+        + this.options.langPrefix
         + this.token.lang
         + '"'
         : '')
@@ -29022,13 +29036,81 @@ function merge(obj) {
  * Marked
  */
 
-function marked(src, opt) {
+function marked(src, opt, callback) {
+  if (callback || typeof opt === 'function') {
+    if (!callback) {
+      callback = opt;
+      opt = null;
+    }
+
+    if (opt) opt = merge({}, marked.defaults, opt);
+
+    var highlight = opt.highlight
+      , tokens
+      , pending
+      , i = 0;
+
+    try {
+      tokens = Lexer.lex(src, opt)
+    } catch (e) {
+      return callback(e);
+    }
+
+    pending = tokens.length;
+
+    var done = function(hi) {
+      var out, err;
+
+      if (hi !== true) {
+        delete opt.highlight;
+      }
+
+      try {
+        out = Parser.parse(tokens, opt);
+      } catch (e) {
+        err = e;
+      }
+
+      opt.highlight = highlight;
+
+      return err
+        ? callback(err)
+        : callback(null, out);
+    };
+
+    if (!highlight || highlight.length < 3) {
+      return done(true);
+    }
+
+    if (!pending) return done();
+
+    for (; i < tokens.length; i++) {
+      (function(token) {
+        if (token.type !== 'code') {
+          return --pending || done();
+        }
+        return highlight(token.text, token.lang, function(err, code) {
+          if (code == null || code === token.text) {
+            return --pending || done();
+          }
+          token.text = code;
+          token.escaped = true;
+          --pending || done();
+        });
+      })(tokens[i]);
+    }
+
+    return;
+  }
   try {
+    if (opt) opt = merge({}, marked.defaults, opt);
     return Parser.parse(Lexer.lex(src, opt), opt);
   } catch (e) {
     e.message += '\nPlease report this to https://github.com/chjj/marked.';
     if ((opt || marked.defaults).silent) {
-      return 'An error occured:\n' + e.message;
+      return '<p>An error occured:</p><pre>'
+        + escape(e.message + '', true)
+        + '</pre>';
     }
     throw e;
   }
@@ -29040,7 +29122,7 @@ function marked(src, opt) {
 
 marked.options =
 marked.setOptions = function(opt) {
-  marked.defaults = opt;
+  merge(marked.defaults, opt);
   return marked;
 };
 
@@ -29050,8 +29132,11 @@ marked.defaults = {
   breaks: false,
   pedantic: false,
   sanitize: false,
+  smartLists: false,
   silent: false,
-  highlight: null
+  highlight: null,
+  langPrefix: 'lang-',
+  smartypants: false
 };
 
 /**
@@ -29069,7 +29154,7 @@ marked.inlineLexer = InlineLexer.output;
 
 marked.parse = marked;
 
-if (typeof module !== 'undefined') {
+if (typeof exports === 'object') {
   module.exports = marked;
 } else if (typeof define === 'function' && define.amd) {
   define(function() { return marked; });
@@ -29672,7 +29757,7 @@ module.exports = function(opts, cb) {
       return issues.get_all(opts, cb);
     }, function(all, cb) {
       return async.map(all, function(array, cb) {
-        return issues.filter(array, opts.size_label, function(err, warn, filtered, total) {
+        return issues.filter(array, opts.size_label, function(err, filtered, total) {
           return cb(err, [filtered, total]);
         });
       }, function(err, _arg) {
